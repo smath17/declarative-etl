@@ -6,6 +6,7 @@ class PygramGenerator:
     def __init__(self, specification: IntermediateSpecification):
         self.dimblocks = []
         self.factblocks = []
+        # TODO: Update to use internal key_refs of ParsedFactTable
         self.keys = []
         for dimension in specification.dimensions:
             self.keys.append(f"'{dimension.name}{specification.pk_name}'")
@@ -23,9 +24,9 @@ from pygrametl.tables import CachedDimension, FactTable"""
         for attribute in dimension.attributes:
             attribute_str += f"'{attribute.name}' "
 
-        dimblock = CodeBlock(f"{dimension.name}_dimension = CachedDimension(", [
+        dimblock = PythonCodeBlock(f"{dimension.name}_dimension = CachedDimension(", [
             f"name='{dimension.name}',",
-            f"key='{dimension.key}',",
+            f"key='{dimension.keys}',",
             f"attributes=[{attribute_str.strip()}])"])
 
         # TODO: Consider returning instead
@@ -37,7 +38,7 @@ from pygrametl.tables import CachedDimension, FactTable"""
         for measure in fact_table.measures:
             measure_list.append(f"'{measure.name}'")
         measure_names = ", ".join(measure_list)
-        factblock = CodeBlock(f"{fact_table.name}_fact_table = FactTable(", [
+        factblock = PythonCodeBlock(f"{fact_table.name}_fact_table = FactTable(", [
             f"name='{fact_table.name}',",
             f"keyrefs=[{keyref_string}],",
             f"measures=[{measure_names}])"
@@ -64,7 +65,7 @@ from pygrametl.tables import CachedDimension, FactTable"""
         file.close()
 
 
-class CodeBlock:
+class PythonCodeBlock:
     def __init__(self, head, block):
         self.head = head
         self.block = block
@@ -73,7 +74,7 @@ class CodeBlock:
         result = indent + self.head + "\n"
         indent += "    "
         for block in self.block:
-            if isinstance(block, CodeBlock):
+            if isinstance(block, PythonCodeBlock):
                 result += block.__str__(indent)
             else:
                 result += indent + block + "\n"

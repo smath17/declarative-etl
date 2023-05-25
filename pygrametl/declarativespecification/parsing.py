@@ -32,7 +32,8 @@ class IntermediateSpecification:
             dim_roles = None
             if 'roles' in dim_content:
                 dim_roles = dim_content["roles"]
-            parsed_dimensions.append(ParsedDimension(dim_name, dim_attributes, dim_roles, dim_name + self.pk_name))
+            parsed_dimensions.append(ParsedDimension(dim_name, dim_attributes, dim_roles, dim_name + self.pk_name,
+                                                     self.dimension_attribute_type))
 
         # Extract all fact tables
         all_fact_tables = list(specification["fact"].items())
@@ -40,7 +41,10 @@ class IntermediateSpecification:
         for fact_table in all_fact_tables:
             fact_table_name, fact_table_content = fact_table
             fact_table_measures = fact_table_content["measures"]
-            parsed_fact_tables.append(ParsedFactTable(fact_table_name, fact_table_measures))
+            # TODO: Do not take every dimension as key_ref
+            key_refs = [dimension.key for dimension in parsed_dimensions]
+            parsed_fact_tables.append(
+                ParsedFactTable(fact_table_name, fact_table_measures, self.measure_type, key_refs))
 
         self.dimensions: list[ParsedDimension] = parsed_dimensions
         self.fact_tables: list[ParsedFactTable] = parsed_fact_tables
@@ -50,12 +54,12 @@ class ParsedAttribute:
     name: str
     attribute_type: str
 
-    def __init__(self, name, attribute_type="default"):
+    def __init__(self, name, attribute_type):
         self.name = name
         self.type = attribute_type
 
     @classmethod
-    def from_list(cls, attribute_list: list[str]):
+    def from_list(cls, attribute_list: list[str], default_type):
         result = []
         for attribute in attribute_list:
             if ':' in attribute:
@@ -63,26 +67,37 @@ class ParsedAttribute:
                 attribute_name, attribute_type = attribute.split(':', 1)
                 result.append(cls(attribute_name, attribute_type.strip()))
             else:
-                result.append(cls(attribute))
+                result.append(cls(attribute, default_type))
         return result
 
+    def __str__(self):
+        return f"{self.name} {self.type}"
 
-class ParsedDimension:
+
+class ParsedTable:
+    def __init__(self, name, members: list[ParsedAttribute], keys, default_type):
+        self.name = name
+        self.members = members
+        # 1 key for primary, more for foreign
+        self.keys = keys
+        self.default_type = default_type
+
+
+class ParsedDimension(ParsedTable):
     name: str
     attributes: list[ParsedAttribute]
     roles: list[str]
 
-    def __init__(self, name, attributes, roles, key):
-        self.name = name
-        self.attributes = ParsedAttribute.from_list(attributes)
+    def __init__(self, name, attributes, roles, key, default_type):
+        members = ParsedAttribute.from_list(attributes)
+        super().__init__(name, members, list(key), default_type)
         self.roles = roles
-        self.key = key
 
 
-class ParsedFactTable:
+class ParsedFactTable(ParsedTable):
     name: str
     measures: list[ParsedAttribute]
 
-    def __init__(self, name, measures):
-        self.name = name
-        self.measures = ParsedAttribute.from_list(measures)
+    def __init__(self, name, measures, default_type, key_refs):
+        members = ParsedAttribute.from_list(measures, default_type)
+        super().__init__(name, members, key_refs, default_type)
