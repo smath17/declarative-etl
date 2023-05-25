@@ -1,0 +1,18 @@
+[Default]
+DBMS = "postgresSQL 15.2"
+pk_naming = "KEY"
+schema_type = "star"
+dimension_attribute_type = "VARCHAR(30)"
+fact_measure_type = "DECIMAL(10, 4)"
+
+[dimension.Customer]
+attributes = ["name", "address"]
+
+[dimension.Part]
+attributes = ["name", "manufacturer"]
+
+[dimension.Date]
+attributes = ["day", "month", "year"]
+
+[fact.Lineorder]
+measures = ["quantity: INT", "price"]

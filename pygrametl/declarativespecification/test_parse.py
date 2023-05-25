@@ -1,7 +1,11 @@
-import parsing
+from pygrametl.declarativespecification.PygramGenerator import PygramGenerator
+from pygrametl.declarativespecification.parsing import IntermediateSpecification
+
 
 def main():
-
+    spec = IntermediateSpecification('test-toml.txt')
+    generator = PygramGenerator(spec)
+    generator.create_pygram_file()
 
 
 if __name__ == "__main__":

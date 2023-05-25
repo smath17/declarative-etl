@@ -32,7 +32,7 @@ class IntermediateSpecification:
             dim_roles = None
             if 'roles' in dim_content:
                 dim_roles = dim_content["roles"]
-            parsed_dimensions.append(ParsedDimension(dim_name, dim_attributes, dim_roles))
+            parsed_dimensions.append(ParsedDimension(dim_name, dim_attributes, dim_roles, dim_name + self.pk_name))
 
         # Extract all fact tables
         all_fact_tables = list(specification["fact"].items())
@@ -72,10 +72,11 @@ class ParsedDimension:
     attributes: list[ParsedAttribute]
     roles: list[str]
 
-    def __init__(self, name, attributes, roles):
+    def __init__(self, name, attributes, roles, key):
         self.name = name
         self.attributes = ParsedAttribute.from_list(attributes)
         self.roles = roles
+        self.key = key
 
 
 class ParsedFactTable:
