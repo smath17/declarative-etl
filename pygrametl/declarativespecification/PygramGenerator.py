@@ -21,7 +21,7 @@ from pygrametl.tables import CachedDimension, FactTable"""
     def generate_dimension(self, dimension: ParsedDimension):
         attribute_str = ""
         attribute: ParsedAttribute
-        for attribute in dimension.attributes:
+        for attribute in dimension.members:
             attribute_str += f"'{attribute.name}' "
 
         dimblock = PythonCodeBlock(f"{dimension.name}_dimension = CachedDimension(", [
@@ -35,7 +35,7 @@ from pygrametl.tables import CachedDimension, FactTable"""
     def generate_fact_table(self, fact_table: ParsedFactTable):
         keyref_string = ", ".join(self.keys)
         measure_list = []
-        for measure in fact_table.measures:
+        for measure in fact_table.members:
             measure_list.append(f"'{measure.name}'")
         measure_names = ", ".join(measure_list)
         factblock = PythonCodeBlock(f"{fact_table.name}_fact_table = FactTable(", [

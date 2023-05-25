@@ -42,9 +42,11 @@ class IntermediateSpecification:
             fact_table_name, fact_table_content = fact_table
             fact_table_measures = fact_table_content["measures"]
             # TODO: Do not take every dimension as key_ref
-            key_refs = [dimension.key for dimension in parsed_dimensions]
+            table_refs = []
+            for dimension in parsed_dimensions:
+                table_refs.append(dimension.name)
             parsed_fact_tables.append(
-                ParsedFactTable(fact_table_name, fact_table_measures, self.measure_type, key_refs))
+                ParsedFactTable(fact_table_name, fact_table_measures, self.measure_type, table_refs))
 
         self.dimensions: list[ParsedDimension] = parsed_dimensions
         self.fact_tables: list[ParsedFactTable] = parsed_fact_tables
@@ -75,6 +77,8 @@ class ParsedAttribute:
 
 
 class ParsedTable:
+    keys: list[str]
+
     def __init__(self, name, members: list[ParsedAttribute], keys, default_type):
         self.name = name
         self.members = members
@@ -85,18 +89,16 @@ class ParsedTable:
 
 class ParsedDimension(ParsedTable):
     name: str
-    attributes: list[ParsedAttribute]
     roles: list[str]
 
     def __init__(self, name, attributes, roles, key, default_type):
-        members = ParsedAttribute.from_list(attributes)
-        super().__init__(name, members, list(key), default_type)
+        members = ParsedAttribute.from_list(attributes, default_type)
+        super().__init__(name, members, [key], default_type)
         self.roles = roles
 
 
 class ParsedFactTable(ParsedTable):
     name: str
-    measures: list[ParsedAttribute]
 
     def __init__(self, name, measures, default_type, key_refs):
         members = ParsedAttribute.from_list(measures, default_type)
