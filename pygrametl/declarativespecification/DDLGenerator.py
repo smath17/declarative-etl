@@ -15,7 +15,7 @@ class CreateTableStatement:
             keys = ["{0}FK INT REFERENCES {1}".format(key, key) for key in table.keys]
         else:
             keys = ["{0} INT {1}".format(key, key_type) for key in table.keys]
-        self.keys_format = ",\n".join(keys)
+        self.keys_format = ",\n".join(keys) + ","
 
     def __str__(self):
         return """CREATE TABLE {name}

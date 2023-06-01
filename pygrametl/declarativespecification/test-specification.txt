@@ -4,6 +4,8 @@ pk_naming = "KEY"
 schema_type = "star"
 dimension_attribute_type = "VARCHAR(30)"
 fact_measure_type = "DECIMAL(10, 4)"
+data_source = "data.csv"
+
 
 [dimension.Customer]
 attributes = ["name", "address"]
@@ -12,7 +14,7 @@ attributes = ["name", "address"]
 attributes = ["name", "manufacturer"]
 
 [dimension.Date]
-attributes = ["day", "month", "year"]
+attributes = ["day: INT", "month: INT", "year: INT"]
 
 [fact.Lineorder]
 measures = ["quantity: INT", "price"]
