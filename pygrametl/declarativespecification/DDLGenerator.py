@@ -50,7 +50,7 @@ class DDLGenerator:
             fact_statements.append(CreateFactTable(fact))
 
         working_dir = os.getcwd()
-        file = open(working_dir + "/DDL-generated-setup", 'w')
+        file = open(working_dir + "/DDL-generated-setup.ddl", 'w')
         for statement in dim_statements:
             file.write(str(statement) + "\n\n")
         for statement in fact_statements:

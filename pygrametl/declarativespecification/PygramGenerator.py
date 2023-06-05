@@ -26,7 +26,7 @@ from pygrametl.tables import CachedDimension, FactTable"""
 
         dimblock = PythonCodeBlock(f"{dimension.name}_dimension = CachedDimension(", [
             f"name='{dimension.name}',",
-            f"key='{dimension.keys}',",
+            f"key='{dimension.keys[0]}',",
             f"attributes=[{attribute_str.strip()}])"])
 
         # TODO: Consider returning instead
@@ -55,7 +55,7 @@ from pygrametl.tables import CachedDimension, FactTable"""
 
         # TODO: Change for better output dir
         working_dir = os.getcwd()
-        file = open(working_dir + "/Pygram-generated-setup", 'w')
+        file = open(working_dir + "/Pygram-generated-setup.py", 'w')
         file.write(self.header + "\n\n")
         for block in self.dimblocks:
             file.write(str(block))
