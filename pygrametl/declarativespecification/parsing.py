@@ -22,16 +22,34 @@ class IntermediateSpecification:
         self.measure_type = default_settings.get("fact_measure_type")
         self.data_source = default_settings.get("data_source")
 
-        # Extract all dimensions
+        # Extract all groups
+        if "group" in specification:
+            all_groups = list(specification.pop("group").items())
+            self.parsed_groups = self.__parse_groups(all_groups)
+
+        # Extract remaining dimensions
         all_dimensions = list(specification["dimension"].items())
         parsed_dimensions = self.__parse_dimensions(all_dimensions)
 
-        # Extract all fact tables
+        # Extract remaining fact tables
         all_fact_tables = list(specification.get("fact").items())
         parsed_fact_tables = self.__parse_fact_tables(all_fact_tables, parsed_dimensions)
 
         self.dimensions: list[ParsedDimension] = parsed_dimensions
         self.fact_tables: list[ParsedFactTable] = parsed_fact_tables
+
+    def __parse_groups(self, groups: list):
+        parsed_groups: list[ParsedGroup] = []
+
+        for group in groups:
+            group_name, group_content = group
+            group_dims = list(group_content.get("dimension").items())
+            parsed_dims = self.__parse_dimensions(group_dims)
+            group_fact_tables = list(group_content.get("fact").items())
+            parsed_fact_tables = self.__parse_fact_tables(group_fact_tables, parsed_dims)
+            parsed_groups.append(ParsedGroup(parsed_dims, parsed_fact_tables))
+
+        return parsed_groups
 
     def __parse_dimensions(self, dimensions: list):
         """
@@ -66,7 +84,10 @@ class IntermediateSpecification:
             # TODO: Do not take every dimension as key_ref
             table_refs = []
             for dimension in parsed_dimensions:
-                table_refs.append(dimension.name)
+                if dimension.roles is not None:
+                    table_refs.extend(dimension.roles)
+                else:
+                    table_refs.append(dimension.name)
             parsed_fact_tables.append(ParsedFactTable(name, measures, self.measure_type, table_refs))
 
         return parsed_fact_tables
@@ -123,3 +144,12 @@ class ParsedFactTable(ParsedTable):
     def __init__(self, name, measures, default_type, key_refs):
         members = ParsedAttribute.from_list(measures, default_type)
         super().__init__(name, members, key_refs, default_type)
+
+
+class ParsedGroup:
+    dimensions: list[ParsedDimension]
+    fact_tables: list[ParsedFactTable]
+
+    def __init__(self, dimensions, fact_tables):
+        self.dimensions = dimensions
+        self.fact_tables = fact_tables
