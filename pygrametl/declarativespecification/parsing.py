@@ -23,6 +23,7 @@ class IntermediateSpecification:
         self.data_source = default_settings.get("data_source")
 
         # Extract all groups
+        self.parsed_groups = []
         if "group" in specification:
             all_groups = list(specification.pop("group").items())
             self.parsed_groups = self.__parse_groups(all_groups)

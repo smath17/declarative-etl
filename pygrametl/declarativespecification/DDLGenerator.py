@@ -1,6 +1,6 @@
 import os
 
-from pygrametl.declarativespecification.parsing import ParsedTable, IntermediateSpecification
+from pygrametl.declarativespecification.parsing import ParsedTable, IntermediateSpecification, ParsedGroup
 
 
 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
@@ -41,6 +41,17 @@ class DDLGenerator:
     def __init__(self, specification: IntermediateSpecification):
         self.spec = specification
 
+    def create_group_statements(self, group: ParsedGroup):
+        dim_statements = []
+        fact_statements = []
+
+        for dim in group.dimensions:
+            dim_statements.append(CreateDimension(dim))
+        for fact in group.fact_tables:
+            fact_statements.append(CreateFactTable(fact))
+
+        return dim_statements, fact_statements
+
     def make_ddl_file(self):
         dim_statements = []
         fact_statements = []
@@ -48,6 +59,11 @@ class DDLGenerator:
             dim_statements.append(CreateDimension(dim))
         for fact in self.spec.fact_tables:
             fact_statements.append(CreateFactTable(fact))
+        if self.spec.parsed_groups:
+            for group in self.spec.parsed_groups:
+                dim_stmts, fact_stmts = self.create_group_statements(group)
+                dim_statements.extend(dim_stmts)
+                fact_statements.extend(fact_stmts)
 
         working_dir = os.getcwd()
         file = open(working_dir + "/DDL-generated-setup.ddl", 'w')

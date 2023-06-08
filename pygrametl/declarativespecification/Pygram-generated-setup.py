@@ -26,7 +26,7 @@ Date_dimension = CachedDimension(
 
 Lineorder_fact_table = FactTable(
     name='Lineorder',
-    keyrefs=['CustomerKEY', 'PartKEY', 'DateKEY'],
+    keyrefs=[Customer, Part, Date],
     measures=['quantity', 'price'])
 
 
