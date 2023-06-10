@@ -1,3 +1,6 @@
+CREATE DATABASE test;
+\connect test
+
 CREATE TABLE Customer_Dimension
 (
 CustomerKEY INT PRIMARY KEY,

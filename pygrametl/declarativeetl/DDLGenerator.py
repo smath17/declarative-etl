@@ -24,13 +24,12 @@ class CreateTableStatement:
             keys = ["{0} INT {1}".format(key, key_type) for key in table.keys]
         self.keys_format = ",\n".join(keys) + ","
 
-
     def __str__(self):
-        return """CREATE TABLE {name}
+        return f"""CREATE TABLE {self.name}
 (
-{keys}
-{columns}
-);""".format(name=self.name, columns=self.columns_format, keys=self.keys_format)
+{self.keys_format}
+{self.columns_format}
+);"""
 
 
 class CreateDimension(CreateTableStatement):
@@ -48,6 +47,10 @@ class CreateFactTable(CreateTableStatement):
 class DDLGenerator:
     def __init__(self, specification: IntermediateSpecification):
         self.spec = specification
+
+    def __create_database_statement(self):
+        return (f"CREATE DATABASE {self.spec.db_name};\n"
+                f"\\connect {self.spec.db_name}")
 
     def create_group_statements(self, group: ParsedGroup):
         dim_statements = []
@@ -75,6 +78,7 @@ class DDLGenerator:
 
         working_dir = os.getcwd()
         file = open(working_dir + "\\out/DDL-generated-setup.ddl", 'w')
+        file.write(self.__create_database_statement() + "\n\n")
         for statement in dim_statements:
             file.write(str(statement) + "\n\n")
         for statement in fact_statements:

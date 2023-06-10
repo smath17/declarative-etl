@@ -15,28 +15,42 @@ class PygramGenerator:
             "from pygrametl.datasources import SQLSource, CSVSource\n"
             "from pygrametl.tables import CachedDimension, FactTable")
 
+    def __generate_csv_connection(self, csv_file):
+        # Example of data source connection
+        data_connection = (
+            f"data_file_handle = open('{csv_file}', 'r', 16384, \"utf-8\")"
+            f"region_source = CSVSource(f=data_file_handle, delimiter=',')"
+        )
+        return data_connection
+
+    def __generate_dw_connection(self, db_name):
+        return (f"dw_string = \"host='localhost' dbname='{db_name}' user='postgres' password='1234'\"\n"
+                f"dw_conn = psycopg2.connect(dw_string)\n"
+                f"dw_conn_wrapper = pygrametl.ConnectionWrapper(connection=dw_conn)"
+                )
+
     def __generate_dimension(self, dimension: ParsedDimension):
         attribute_str = ""
         attribute: ParsedAttribute
         for attribute in dimension.members:
-            attribute_str += f"'{attribute.name}' "
+            attribute_str += f"'{attribute.name}', "
 
         dim_block = PythonCodeBlock(f"{dimension.name}_Dimension = CachedDimension(", [
-            f"name='{dimension.name}',",
+            f"name='{dimension.name}_Dimension',",
             f"key='{dimension.keys[0]}',",
-            f"attributes=[{attribute_str.strip()}])"])
+            f"attributes=[{attribute_str[:-2]}])"])
 
         # TODO: Consider returning instead
         self.dim_blocks.append(dim_block)
 
-    def __generate_fact_table(self, fact_table: ParsedFactTable):
-        keyref_string = ", ".join(fact_table.keys)
+    def __generate_fact_table(self, fact_table: ParsedFactTable, key_naming):
+        keyref_string = ", ".join(f"'{key + key_naming}'" for key in fact_table.keys)
         measure_list = []
         for measure in fact_table.members:
             measure_list.append(f"'{measure.name}'")
         measure_names = ", ".join(measure_list)
         fact_block = PythonCodeBlock(f"{fact_table.name}_Fact_Table = FactTable(", [
-            f"name='{fact_table.name}',",
+            f"name='{fact_table.name}_Fact_Table',",
             f"keyrefs=[{keyref_string}],",
             f"measures=[{measure_names}])"
         ])
@@ -44,31 +58,31 @@ class PygramGenerator:
         # TODO: Consider returning instead
         self.fact_blocks.append(fact_block)
 
-    def __generate_group(self, group: ParsedGroup):
+    def __generate_group(self, group: ParsedGroup, key_naming):
         for dim in group.dimensions:
             self.__generate_dimension(dim)
 
         for fact in group.fact_tables:
-            self.__generate_fact_table(fact)
+            self.__generate_fact_table(fact, key_naming)
 
     def create_pygram_file(self, specification: IntermediateSpecification):
         for dim in specification.dimensions:
             self.__generate_dimension(dim)
         for fact_table in specification.fact_tables:
-            self.__generate_fact_table(fact_table)
+            self.__generate_fact_table(fact_table, specification.pk_name)
         if specification.parsed_groups:
             for group in specification.parsed_groups:
-                self.__generate_group(group)
+                self.__generate_group(group, specification.pk_name)
 
         # TODO: Change for better output dir
         working_dir = os.getcwd()
         output_file = open(working_dir + "/out/Pygram-generated-setup.py", 'w')
         output_file.write(self.header + "\n\n")
+        output_file.write(self.__generate_dw_connection(specification.db_name) + "\n\n")
         for block in self.dim_blocks:
-            output_file.write(str(block))
-            output_file.write("\n\n")
+            output_file.write(str(block) + "\n")
         for block in self.fact_blocks:
-            output_file.write(str(block) + "\n\n")
+            output_file.write(str(block))
         output_file.close()
 
 

@@ -21,6 +21,7 @@ class IntermediateSpecification:
         self.dimension_attribute_type = default_settings.get("dimension_attribute_type")
         self.measure_type = default_settings.get("fact_measure_type")
         self.data_source = default_settings.get("data_source")
+        self.db_name = default_settings.get("db_name")
 
         # Extract all groups
         self.parsed_groups = []
@@ -85,10 +86,10 @@ class IntermediateSpecification:
             # TODO: Do not take every dimension as key_ref
             table_refs = []
             for dimension in parsed_dimensions:
-                if dimension.roles is not None:
-                    table_refs.extend(dimension.roles)
-                else:
-                    table_refs.append(dimension.name)
+                #if dimension.roles is not None:
+                #    table_refs.extend(dimension.roles)
+                #else:
+                table_refs.append(dimension.name)
             parsed_fact_tables.append(ParsedFactTable(name, measures, self.measure_type, table_refs))
 
         return parsed_fact_tables

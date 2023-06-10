@@ -1,5 +1,6 @@
 [Default]
 DBMS = "postgresSQL 15.2"
+db_name = "test"
 pk_naming = "KEY"
 schema_type = "star"
 dimension_attribute_type = "VARCHAR(30)"
