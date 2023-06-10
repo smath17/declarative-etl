@@ -62,14 +62,14 @@ class PygramGenerator:
 
         # TODO: Change for better output dir
         working_dir = os.getcwd()
-        file = open(working_dir + "/Pygram-generated-setup.py", 'w')
-        file.write(self.header + "\n\n")
+        output_file = open(working_dir + "/out/Pygram-generated-setup.py", 'w')
+        output_file.write(self.header + "\n\n")
         for block in self.dim_blocks:
-            file.write(str(block))
-            file.write("\n\n")
+            output_file.write(str(block))
+            output_file.write("\n\n")
         for block in self.fact_blocks:
-            file.write(str(block) + "\n\n")
-        file.close()
+            output_file.write(str(block) + "\n\n")
+        output_file.close()
 
 
 class PythonCodeBlock:
