@@ -1,28 +1,36 @@
 import os
 
-from pygrametl.declarativeetl.parsing import ParsedTable, IntermediateSpecification, ParsedGroup
+from pygrametl.declarativeetl.parsing import *
 
 
 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
 class CreateTableStatement:
     def __init__(self, table: ParsedTable, key_type: str):
-        self.table = table
+        # Add descriptive name
+        if isinstance(table, ParsedDimension):
+            self.name = table.name + "_Dimension"
+        elif isinstance(table, ParsedFactTable):
+            self.name = table.name + "_Fact_Table"
+
+        # Format members as strings separated by commas and lines
         str_columns = [str(member) for member in table.members]
         self.columns_format = ",\n".join(str_columns)
+
         # TODO: Consider changing keys for fkeys and pkeys
         # TODO: fix this shit
         if key_type == "FOREIGN KEY":
-            keys = ["{0}FK INT REFERENCES {1}".format(key, key) for key in table.keys]
+            keys = ["{0}FK INT REFERENCES {1}".format(key, key + "_Dimension") for key in table.keys]
         else:
             keys = ["{0} INT {1}".format(key, key_type) for key in table.keys]
         self.keys_format = ",\n".join(keys) + ","
+
 
     def __str__(self):
         return """CREATE TABLE {name}
 (
 {keys}
 {columns}
-);""".format(name=self.table.name, columns=self.columns_format, keys=self.keys_format)
+);""".format(name=self.name, columns=self.columns_format, keys=self.keys_format)
 
 
 class CreateDimension(CreateTableStatement):

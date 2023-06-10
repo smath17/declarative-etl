@@ -21,7 +21,7 @@ class PygramGenerator:
         for attribute in dimension.members:
             attribute_str += f"'{attribute.name}' "
 
-        dim_block = PythonCodeBlock(f"{dimension.name}_dimension = CachedDimension(", [
+        dim_block = PythonCodeBlock(f"{dimension.name}_Dimension = CachedDimension(", [
             f"name='{dimension.name}',",
             f"key='{dimension.keys[0]}',",
             f"attributes=[{attribute_str.strip()}])"])
@@ -35,7 +35,7 @@ class PygramGenerator:
         for measure in fact_table.members:
             measure_list.append(f"'{measure.name}'")
         measure_names = ", ".join(measure_list)
-        fact_block = PythonCodeBlock(f"{fact_table.name}_fact_table = FactTable(", [
+        fact_block = PythonCodeBlock(f"{fact_table.name}_Fact_Table = FactTable(", [
             f"name='{fact_table.name}',",
             f"keyrefs=[{keyref_string}],",
             f"measures=[{measure_names}])"
