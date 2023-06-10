@@ -49,8 +49,8 @@ class DDLGenerator:
         self.spec = specification
 
     def __create_database_statement(self):
-        return (f"CREATE DATABASE {self.spec.db_name};\n"
-                f"\\connect {self.spec.db_name}")
+        return (f"CREATE DATABASE {self.spec.dw_name};\n"
+                f"\\connect {self.spec.dw_name}")
 
     def create_group_statements(self, group: ParsedGroup):
         dim_statements = []
