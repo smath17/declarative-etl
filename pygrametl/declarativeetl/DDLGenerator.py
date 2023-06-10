@@ -1,6 +1,6 @@
 import os
 
-from pygrametl.declarativespecification.parsing import ParsedTable, IntermediateSpecification, ParsedGroup
+from pygrametl.declarativeetl.parsing import ParsedTable, IntermediateSpecification, ParsedGroup
 
 
 # noinspection SqlDialectInspection,SqlNoDataSourceInspection

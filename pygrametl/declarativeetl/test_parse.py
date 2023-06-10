@@ -1,8 +1,8 @@
 import sys
 
-from pygrametl.declarativespecification.DDLGenerator import DDLGenerator
-from pygrametl.declarativespecification.PygramGenerator import PygramGenerator
-from pygrametl.declarativespecification.parsing import IntermediateSpecification
+from pygrametl.declarativeetl.DDLGenerator import DDLGenerator
+from pygrametl.declarativeetl.PygramGenerator import PygramGenerator
+from pygrametl.declarativeetl.parsing import IntermediateSpecification
 
 
 def create(spec_filepath):
@@ -12,7 +12,7 @@ def create(spec_filepath):
 
 
 def generate_pygram(spec):
-    generator = PygramGenerator(spec)
+    generator = PygramGenerator()
     generator.create_pygram_file(spec)
 
 
