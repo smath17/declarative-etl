@@ -77,7 +77,7 @@ class PygramGenerator:
 
         # TODO: Change for better output dir
         working_dir = os.getcwd()
-        output_file = open(working_dir + "/out/Pygram-generated-setup.py", 'w')
+        output_file = open(working_dir + "/Pygram-generated-setup.py", 'w')
         output_file.write(self.header + "\n\n")
         output_file.write(self.__generate_dw_connection(specification.dw_name) + "\n\n")
         for block in self.dim_blocks:

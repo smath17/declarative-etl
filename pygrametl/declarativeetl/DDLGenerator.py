@@ -82,7 +82,7 @@ class DDLGenerator:
                 fact_statements.extend(fact_stmts)
 
         working_dir = os.getcwd()
-        file = open(working_dir + "\\out/DDL-generated-setup.ddl", 'w')
+        file = open(working_dir + "/DDL-generated-setup.ddl", 'w')
         file.write(self.__create_database_statement() + "\n\n")
         for statement in dim_statements:
             file.write(str(statement) + "\n\n")
