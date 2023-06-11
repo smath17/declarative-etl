@@ -83,13 +83,13 @@ class IntermediateSpecification:
         for fact_table in fact_tables:
             name = fact_table[0]
             measures = fact_table[1].get("measures")
-            # TODO: Do not take every dimension as key_ref
             table_refs = []
             for dimension in parsed_dimensions:
-                #if dimension.roles is not None:
-                #    table_refs.extend(dimension.roles)
-                #else:
-                table_refs.append(dimension.name)
+                if dimension.roles is not None:
+                    for role in dimension.roles:
+                        table_refs.append((dimension.name, role))
+                else:
+                    table_refs.append((dimension.name, dimension.name + self.pk_name))
             parsed_fact_tables.append(ParsedFactTable(name, measures, self.measure_type, table_refs))
 
         return parsed_fact_tables
@@ -120,32 +120,32 @@ class ParsedAttribute:
 
 
 class ParsedTable:
-    keys: list[str]
-
-    def __init__(self, name, members: list[ParsedAttribute], keys, default_type):
+    def __init__(self, name, members: list[ParsedAttribute], default_type):
         self.name = name
         self.members = members
-        # 1 key for primary, more for foreign
-        self.keys = keys
         self.default_type = default_type
 
 
 class ParsedDimension(ParsedTable):
     name: str
     roles: list[str]
+    key: str
 
     def __init__(self, name, attributes, roles, key, default_type):
         members = ParsedAttribute.from_list(attributes, default_type)
-        super().__init__(name, members, [key], default_type)
+        super().__init__(name, members, default_type)
         self.roles = roles
+        self.key = key
 
 
 class ParsedFactTable(ParsedTable):
     name: str
+    list_dim_name_and__reference: list[(str, str)]
 
     def __init__(self, name, measures, default_type, key_refs):
         members = ParsedAttribute.from_list(measures, default_type)
-        super().__init__(name, members, key_refs, default_type)
+        super().__init__(name, members, default_type)
+        self.list_dim_name_and__reference = key_refs
 
 
 class ParsedGroup:

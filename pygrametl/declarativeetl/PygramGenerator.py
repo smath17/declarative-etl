@@ -30,21 +30,22 @@ class PygramGenerator:
                 )
 
     def __generate_dimension(self, dimension: ParsedDimension):
-        attribute_str = ""
         attribute: ParsedAttribute
+
+        attribute_str = ""
         for attribute in dimension.members:
             attribute_str += f"'{attribute.name}', "
 
         dim_block = PythonCodeBlock(f"{dimension.name}_Dimension = CachedDimension(", [
             f"name='{dimension.name}_Dimension',",
-            f"key='{dimension.keys[0]}',",
+            f"key='{dimension.key}',",
             f"attributes=[{attribute_str[:-2]}])"])
 
         # TODO: Consider returning instead
         self.dim_blocks.append(dim_block)
 
-    def __generate_fact_table(self, fact_table: ParsedFactTable, key_naming):
-        keyref_string = ", ".join(f"'{key + key_naming}'" for key in fact_table.keys)
+    def __generate_fact_table(self, fact_table: ParsedFactTable):
+        keyref_string = ", ".join(f"'{reference}'" for name, reference in fact_table.list_dim_name_and__reference)
         measure_list = []
         for measure in fact_table.members:
             measure_list.append(f"'{measure.name}'")
@@ -58,21 +59,21 @@ class PygramGenerator:
         # TODO: Consider returning instead
         self.fact_blocks.append(fact_block)
 
-    def __generate_group(self, group: ParsedGroup, key_naming):
+    def __generate_group(self, group: ParsedGroup):
         for dim in group.dimensions:
             self.__generate_dimension(dim)
 
         for fact in group.fact_tables:
-            self.__generate_fact_table(fact, key_naming)
+            self.__generate_fact_table(fact)
 
     def create_pygram_file(self, specification: IntermediateSpecification):
         for dim in specification.dimensions:
             self.__generate_dimension(dim)
         for fact_table in specification.fact_tables:
-            self.__generate_fact_table(fact_table, specification.pk_name)
+            self.__generate_fact_table(fact_table)
         if specification.parsed_groups:
             for group in specification.parsed_groups:
-                self.__generate_group(group, specification.pk_name)
+                self.__generate_group(group)
 
         # TODO: Change for better output dir
         working_dir = os.getcwd()

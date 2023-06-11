@@ -5,12 +5,13 @@ from pygrametl.declarativeetl.parsing import *
 
 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
 class CreateTableStatement:
-    def __init__(self, table: ParsedTable, key_type: str):
+    def __init__(self, table: ParsedTable, key_str, key_type: str):
         # Add descriptive name
         if isinstance(table, ParsedDimension):
             self.name = table.name + "_Dimension"
         elif isinstance(table, ParsedFactTable):
             self.name = table.name + "_Fact_Table"
+        self.key_str = key_str
 
         # Format members as strings separated by commas and lines
         str_columns = [str(member) for member in table.members]
@@ -18,30 +19,34 @@ class CreateTableStatement:
 
         # TODO: Consider changing keys for fkeys and pkeys
         # TODO: fix this shit
-        if key_type == "FOREIGN KEY":
-            keys = ["{0}FK INT REFERENCES {1}".format(key, key + "_Dimension") for key in table.keys]
-        else:
-            keys = ["{0} INT {1}".format(key, key_type) for key in table.keys]
-        self.keys_format = ",\n".join(keys) + ","
+        #if key_type == "FOREIGN KEY":
+        #    keys = ["{0} INT REFERENCES {1}".format(key, key + "_Dimension") for key in table.keys]
+        #else:
+        #    keys = ["{0} INT {1}".format(key, key_type) for key in table.keys]
+        #self.keys_format = ",\n".join(keys) + ","
 
     def __str__(self):
         return f"""CREATE TABLE {self.name}
 (
-{self.keys_format}
-{self.columns_format}
+{self.key_str}{self.columns_format}
 );"""
 
 
 class CreateDimension(CreateTableStatement):
-    def __init__(self, table):
+    def __init__(self, table: ParsedDimension):
         # TODO: should be able to have foreign keys, for snowflake
-        super().__init__(table, key_type="PRIMARY KEY")
+        key_str = f"{table.key} SERIAL PRIMARY KEY,\n"
+        super().__init__(table, key_str, key_type="PRIMARY KEY")
 
 
 class CreateFactTable(CreateTableStatement):
-    def __init__(self, table):
+    def __init__(self, table: ParsedFactTable):
+        foreign_key_str = "".join(["{0} SERIAL REFERENCES {1}_Dimension,\n".format(reference, name) for name, reference in
+                   table.list_dim_name_and__reference])
+        composite_key_str = "PRIMARY KEY ({0}),\n".format(", ".join([reference for name, reference in table.list_dim_name_and__reference]))
+        key_str = foreign_key_str + composite_key_str
         # TODO: Should also have primary composite key
-        super().__init__(table, key_type="FOREIGN KEY")
+        super().__init__(table, key_str, key_type="FOREIGN KEY")
 
 
 class DDLGenerator:

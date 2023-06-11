@@ -3,21 +3,21 @@ CREATE DATABASE test;
 
 CREATE TABLE Customer_Dimension
 (
-CustomerKEY INT PRIMARY KEY,
+CustomerKEY SERIAL PRIMARY KEY,
 name VARCHAR(30),
 address VARCHAR(30)
 );
 
 CREATE TABLE Part_Dimension
 (
-PartKEY INT PRIMARY KEY,
+PartKEY SERIAL PRIMARY KEY,
 name VARCHAR(30),
 manufacturer VARCHAR(30)
 );
 
 CREATE TABLE Date_Dimension
 (
-DateKEY INT PRIMARY KEY,
+DateKEY SERIAL PRIMARY KEY,
 day INT,
 month INT,
 year INT
@@ -25,9 +25,10 @@ year INT
 
 CREATE TABLE Lineorder_Fact_Table
 (
-CustomerFK INT REFERENCES Customer_Dimension,
-PartFK INT REFERENCES Part_Dimension,
-DateFK INT REFERENCES Date_Dimension,
+CustomerKEY SERIAL REFERENCES Customer_Dimension,
+PartKEY SERIAL REFERENCES Part_Dimension,
+DateKEY SERIAL REFERENCES Date_Dimension,
+PRIMARY KEY (CustomerKEY, PartKEY, DateKEY),
 quantity INT,
 price DECIMAL(10, 4)
 );
