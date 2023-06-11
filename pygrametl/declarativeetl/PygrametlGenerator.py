@@ -66,7 +66,7 @@ class PygramGenerator:
         for fact in group.fact_tables:
             self.__generate_fact_table(fact)
 
-    def create_pygram_file(self, specification: IntermediateSpecification):
+    def create_pygrametl_file(self, specification: IntermediateSpecification):
         for dim in specification.dimensions:
             self.__generate_dimension(dim)
         for fact_table in specification.fact_tables:
@@ -77,7 +77,7 @@ class PygramGenerator:
 
         # TODO: Change for better output dir
         working_dir = os.getcwd()
-        output_file = open(working_dir + "/Pygram-generated-setup.py", 'w')
+        output_file = open(working_dir + "/PygramETL-generated-setup.py", 'w')
         output_file.write(self.header + "\n\n")
         output_file.write(self.__generate_dw_connection(specification.dw_name) + "\n\n")
         for block in self.dim_blocks:
