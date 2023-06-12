@@ -16,6 +16,7 @@ attributes = ["name", "manufacturer"]
 
 [dimension.Date]
 attributes = ["day: INT", "month: INT", "year: INT"]
+roles = ["CommitDate", "ShippingDate"]
 
 [fact.Lineorder]
 measures = ["quantity: INT", "price"]
