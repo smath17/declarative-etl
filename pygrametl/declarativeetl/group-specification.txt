@@ -6,15 +6,19 @@ schema_type = "star"
 dimension_attribute_type = "VARCHAR(30)"
 fact_measure_type = "DECIMAL(10, 4)"
 
-[dimension.Customer]
+[group.hej.dimension.Customer]
 attributes = ["name", "address"]
 
-[dimension.Part]
-attributes = ["name", "manufacturer", "category", "brand", "color", "type",
-              "size: INT", "container", "retail_price: INT", "comment"]
+[group.hej.dimension.Part]
+attributes = ["name", "manufacturer"]
 
 [dimension.Date]
 attributes = ["day: INT", "month: INT", "year: INT"]
+roles = ["CommitDate", "ShippingDate"]
 
 [fact.Lineorder]
+measures = ["quantity: INT", "price"]
+
+
+[group.hej.fact.order]
 measures = ["quantity: INT", "price"]

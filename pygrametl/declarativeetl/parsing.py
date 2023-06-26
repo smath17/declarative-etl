@@ -24,9 +24,10 @@ class IntermediateSpecification:
         self.dw_name = default_settings.get("data_warehouse_name")
 
         # Extract all groups
+        # TODO: split the groups and put the dims/fact in the other lists. No need for groups when refs are handled
         self.parsed_groups = []
         if "group" in specification:
-            all_groups = list(specification.pop("group").items())
+            all_groups = list(specification.pop("group").items()) # TODO: this is apparently a list of dicts, not a dict
             self.parsed_groups = self.__parse_groups(all_groups)
 
         # Extract remaining dimensions
@@ -96,10 +97,7 @@ class IntermediateSpecification:
 
 
 class ParsedAttribute:
-    name: str
-    attribute_type: str
-
-    def __init__(self, name, attribute_type):
+    def __init__(self, name: str, attribute_type: str):
         self.name = name
         self.type = attribute_type
 
@@ -123,11 +121,10 @@ class ParsedTable:
     def __init__(self, name, members: list[ParsedAttribute], default_type):
         self.name = name
         self.members = members
-        self.default_type = default_type
+        # self.default_type = default_type
 
 
 class ParsedDimension(ParsedTable):
-    name: str
     roles: list[str]
     key: str
 
@@ -139,7 +136,6 @@ class ParsedDimension(ParsedTable):
 
 
 class ParsedFactTable(ParsedTable):
-    name: str
     list_dim_name_and__reference: list[(str, str)]
 
     def __init__(self, name, measures, default_type, key_refs):

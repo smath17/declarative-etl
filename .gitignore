@@ -3,3 +3,5 @@ tests
 docs/_build
 __pycache__/
 *.egg-info/
+DDL-generated-setup.ddl
+PygramETL-generated-setup.py
